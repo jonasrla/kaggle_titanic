@@ -1,4 +1,5 @@
 import pandas as pd
+from sklearn.preprocessing import LabelEncoder
 
 TITLES = {'Don': 'Mr',
           'Major': 'Mr',
@@ -33,3 +34,8 @@ def augment_table(table):
     table['Age*Class'] = table['Age'] * table['Pclass']
     table['Fare_Per_Person'] = table['Fare'] / (table['Family_Size']+1)
     return table
+
+def tokenize(table, columns):
+    le = LabelEncoder()
+    for c in columns:
+        table[c] = le.fit_transform(table[c])
