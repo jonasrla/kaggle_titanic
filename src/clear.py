@@ -39,3 +39,4 @@ def tokenize(table, columns):
     le = LabelEncoder()
     for c in columns:
         table[c] = le.fit_transform(table[c])
+    return table
