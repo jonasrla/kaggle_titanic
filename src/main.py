@@ -9,6 +9,7 @@ table = pd.read_csv('data/train.csv')
 m = table.shape[0]
 train_size = (m*4)/5
 # Data cleaning
+table.loc[np.isnan(table.Age), 'Age'] = np.mean(table.Age)
 table = augment_table(table)
 table.drop(['PassengerId', 'Name', 'Ticket', 'Cabin'], axis=1, inplace=True)
 table = tokenize(table, ['Pclass',
