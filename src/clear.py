@@ -1,5 +1,4 @@
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder
 
 TITLES = {'Don': 'Mr',
           'Major': 'Mr',
@@ -35,8 +34,13 @@ def augment_table(table):
     table['Fare_Per_Person'] = table['Fare'] / (table['Family_Size']+1)
     return table
 
-def tokenize(table, columns):
-    le = LabelEncoder()
+def tokenize(train, test, columns):
     for c in columns:
-        table[c] = le.fit_transform(table[c])
-    return table
+        dum = pd.get_dummies(train[c])
+        for label in list(dum):
+            feat = "{}_{}".format(c, label)
+            train = train.assign(**{feat: dum[label]})
+            test = test.assign(**{feat: test[c]==label})
+    train.drop(columns, axis=1, inplace=True)
+    test.drop(columns, axis=1, inplace=True)
+    return (train, test)
