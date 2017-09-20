@@ -1,5 +1,6 @@
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import LabelEncoder
 from clear import augment_table, tokenize
 import numpy as np
@@ -41,12 +42,28 @@ Y_train = Y[index[:train_size]]
 
 X_val = X[index[train_size:]]
 Y_val = Y[index[train_size:]]
+
 # Build model
-rfc = RandomForestClassifier()
-rfc.fit(X_train, Y_train)
-
+rfc = RandomForestClassifier(n_estimators=100, n_jobs=-1)
+# rfc = RandomForestClassifier()
+parameters = {'max_features': ['auto', 1, 0.1, 0.3, 1.0],
+              'max_depth': range(5, 21, 5),
+              'min_samples_split': range(2, 33, 10),
+              'min_samples_leaf': range(1, 32, 10)}
+clf = GridSearchCV(rfc, parameters, verbose=1, n_jobs=-1)
+clf.fit(X_train, Y_train)
+# print clf.best_params_
 # Classify
-Y_hat = rfc.predict(X_val)
+Y_hat1 = clf.predict(X_val)
 
-prec = np.sum(Y_val==Y_hat, dtype=np.float64)/(m-train_size)
-print "Precision rate: {}".format(prec)
+prec = np.sum(Y_val==Y_hat1, dtype=np.float64)/(m-train_size)
+print "Validation Precision rate: {}".format(prec)
+
+Y_hat2 = clf.predict(X_train)
+
+prec = np.sum(Y_train==Y_hat2, dtype=np.float64)/(train_size)
+print "Train Precision rate: {}".format(prec)
+
+Y_hat = clf.predict(X_test)
+label_test = label_test.assign(Survived=Y_hat)
+label_test.to_csv('output.csv', index=False)
